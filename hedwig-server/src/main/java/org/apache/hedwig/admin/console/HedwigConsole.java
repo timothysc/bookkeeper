@@ -18,9 +18,9 @@
 
 package org.apache.hedwig.admin.console;
 
-import jline.ConsoleReader;
-import jline.History;
-import jline.Terminal;
+import jline.console.ConsoleReader;
+import jline.console.history.FileHistory;
+import jline.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -98,7 +98,6 @@ public class HedwigConsole {
     protected Subscriber subscriber;
     protected ConsoleMessageHandler consoleHandler =
             new ConsoleMessageHandler();
-    protected Terminal terminal;
 
     protected String myRegion;
 
@@ -839,7 +838,9 @@ public class HedwigConsole {
      */
     public HedwigConsole(String[] args) throws IOException, InterruptedException {
         // Setup Terminal
-        terminal = Terminal.setupTerminal();
+        TerminalFactory.configure(TerminalFactory.AUTO);
+        TerminalFactory.reset();
+
         HedwigCommands.init();
         cl.parseOptions(args);
 
@@ -906,14 +907,10 @@ public class HedwigConsole {
 
     protected boolean continueOrQuit() throws IOException {
         System.out.println("Press <Return> to continue, or Q to cancel ...");
-        int ch;
+        int ch='q';
         if (null != console) {
             ch = console.readCharacter(CONTINUE_OR_QUIT);
-        } else {
-            do {
-                ch = terminal.readCharacter(System.in);
-            } while (ch != 'q' && ch != 'Q' && ch != '\n');
-        }
+        } 
         if (ch == 'q' ||
             ch == 'Q') {
             return false;
@@ -987,23 +984,23 @@ public class HedwigConsole {
 
             console = new ConsoleReader();
             JLineHedwigCompletor completor = new JLineHedwigCompletor(admin);
-            console.addCompletor(completor);
+            console.addCompleter(completor);
 
             // load history file
-            History history = new History();
             File file = new File(System.getProperty("hw.history",
                                  new File(System.getProperty("user.home"), HW_HISTORY_FILE).toString()));
+            FileHistory history = new FileHistory(file);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("History file is " + file.toString());
             }
-            history.setHistoryFile(file);
+
             // set history to console reader
             console.setHistory(history);
             // load history from history file
-            history.moveToFirstEntry();
+            history.moveToFirst();
 
             while (history.next()) {
-                String entry = history.current();
+                String entry = (String)history.current();
                 if (!entry.equals("")) {
                     addToHistory(commandCount, entry);
                 }
@@ -1014,7 +1011,7 @@ public class HedwigConsole {
             String line;
             while ((line = console.readLine(getPrompt())) != null) {
                 executeLine(line);
-                history.addToHistory(line);
+                history.add(line);
             }
         }
 

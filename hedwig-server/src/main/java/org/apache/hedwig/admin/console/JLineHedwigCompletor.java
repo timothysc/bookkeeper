@@ -26,14 +26,14 @@ import org.apache.hedwig.admin.HedwigAdmin;
 
 import com.google.protobuf.ByteString;
 
-import jline.Completor;
+import jline.console.completer.Completer;
 
 import static org.apache.hedwig.admin.console.HedwigCommands.*;
 
 /**
  * A jline completor for hedwig console
  */
-public class JLineHedwigCompletor implements Completor {
+public class JLineHedwigCompletor implements Completer {
     // for topic completion
     static final int MAX_TOPICS_TO_SEARCH = 1000;
 
