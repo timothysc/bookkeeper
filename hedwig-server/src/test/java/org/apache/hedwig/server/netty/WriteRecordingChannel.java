@@ -166,5 +166,13 @@ public class WriteRecordingChannel implements Channel {
     public int compareTo(Channel o) {
         throw new RuntimeException("Not intended");
     }
+   
+    public Object getAttachment() {
+        return null;
+    }
+
+    public void setAttachment(Object attachment) {
+
+    }
 
 }
